@@ -216,7 +216,12 @@ function Cluster({ lang, selected, onSelect }) {
   )
 
   const compact = size.width < 768
-  const groupScale = size.width < 480 ? 0.56 : size.width < 768 ? 0.74 : 1
+  // Bigger on desktop so the graph is easier to appreciate; scales with width.
+  const groupScale =
+    size.width < 480 ? 0.56
+    : size.width < 768 ? 0.74
+    : size.width < 1280 ? 1.3
+    : 1.5
 
   useFrame(({ pointer, clock }) => {
     const t = clock.getElapsedTime()

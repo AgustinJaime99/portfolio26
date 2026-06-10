@@ -83,6 +83,7 @@ export const content = {
         { id: 'home', label: 'Inicio' },
         { id: 'about', label: 'Sobre mí' },
         { id: 'skills', label: 'Skills' },
+        { id: 'experience', label: 'Experiencia' },
         { id: 'projects', label: 'Proyectos' },
         { id: 'contact', label: 'Contacto' },
       ],
@@ -124,13 +125,63 @@ export const content = {
     },
     skills: {
       eyebrow: '02 — Tech Stack',
-      titleStart: 'Tecnologías con las que ',
-      titleHighlight: 'construyo',
+      titleStart: 'Tecnologías que me ',
+      titleHighlight: 'destacan',
       hint: 'toca o pasa el cursor sobre cada nodo para ver detalles',
       groups: skillGroups(['Frontend', 'Backend', 'Bases de datos & ORMs', 'DevOps & Tools', 'Ingeniería', 'IA & Automatización']),
     },
+    experience: {
+      eyebrow: '03 — Experiencia',
+      titleStart: 'Lugares donde aporte mis ',
+      titleHighlight: 'habilidades',
+      hint: 'desliza para recorrer mi trayectoria',
+      items: [
+        {
+          role: 'Fullstack Developer',
+          company: 'Ingenes',
+          period: 'Abr 2023 — Actual',
+          summary:
+            'Diseño y construcción de productos end-to-end: onboarding inteligente con scoring, APIs en NestJS, e-commerce interno y analítica.',
+          highlights: [
+            'Diseño e implementación de flujos de onboarding inteligentes con sistema de scoring que segmenta perfiles según objetivos de negocio, optimizando la conversión.',
+            'Diseño y mantenimiento de endpoints API con NestJS y Node.js, integrando bases de datos con validaciones por roles para flujos de supervisión.',
+            'Desarrollo de e-commerce interno con caché en cliente (SWR) y revalidación selectiva, mejorando tiempos de navegación bajo alta demanda.',
+            'Reportes de analítica personalizados e integración de píxeles (META, GTAG, TikTok) para medir y optimizar campañas.',
+            'Aplicación de Clean Code y Clean Architecture; mentoría técnica a developers Jr mediante revisión de PRs y acompañamiento en deploys.',
+          ],
+          tags: ['TypeScript', 'Next.js', 'NestJS', 'Node.js', 'Prisma', 'SWR', 'MySQL', 'Docker', 'Vercel'],
+        },
+        {
+          role: 'Frontend Developer',
+          company: 'B21',
+          period: 'Ene 2022 — Mar 2023',
+          summary:
+            'Desarrollo del onboarding fintech para préstamos y seguimiento de su estado, traduciendo diseños de Figma a interfaces animadas.',
+          highlights: [
+            'Desarrollo del flujo de onboarding fintech para solicitud de préstamos personalizado según las necesidades del usuario.',
+            'Integración con APIs REST junto al equipo de backend para garantizar consistencia de datos.',
+            'Interfaz para el seguimiento del estado de préstamos otorgados por compañías financieras asociadas.',
+            'Traducción de diseños de Figma a interfaces interactivas con animaciones fluidas mediante Framer Motion.',
+          ],
+          tags: ['TypeScript', 'Next.js', 'Framer Motion', 'Styled Components', 'AWS', 'Git'],
+        },
+        {
+          role: 'Fullstack Developer',
+          company: 'Proyecto Wow',
+          period: 'Oct 2020 — Dic 2021',
+          summary:
+            'Plataforma de cursos online con foco en frontend y soporte fullstack en endpoints, autenticación y manejo de sesiones.',
+          highlights: [
+            'Desarrollo de plataforma de cursos online con foco en frontend y soporte fullstack en endpoints y autenticación.',
+            'Integración de APIs REST y queries GraphQL; autenticación interna y manejo de sesiones.',
+            'Trabajo colaborativo con equipos de UX/UI, frontend y backend, traduciendo diseños de Figma a componentes reutilizables.',
+          ],
+          tags: ['React', 'Next.js', 'JavaScript', 'GraphQL', 'Node.js', 'Git'],
+        },
+      ],
+    },
     projects: {
-      eyebrow: '03 — Proyectos',
+      eyebrow: '04 — Proyectos',
       titleStart: 'Cosas que he ',
       titleHighlight: 'construido',
       featuredBadge: 'Proyecto destacado',
@@ -148,7 +199,7 @@ export const content = {
       ],
     },
     contact: {
-      eyebrow: '04 — Contacto',
+      eyebrow: '05 — Contacto',
       titleStart: '¿Construimos algo ',
       titleHighlight: 'juntos',
       titleEnd: '?',
@@ -171,6 +222,7 @@ export const content = {
         { id: 'home', label: 'Home' },
         { id: 'about', label: 'About' },
         { id: 'skills', label: 'Skills' },
+        { id: 'experience', label: 'Experience' },
         { id: 'projects', label: 'Projects' },
         { id: 'contact', label: 'Contact' },
       ],
@@ -217,8 +269,58 @@ export const content = {
       hint: 'tap or hover over each node to see details',
       groups: skillGroups(['Frontend', 'Backend', 'Databases & ORMs', 'DevOps & Tools', 'Engineering', 'AI & Automation']),
     },
+    experience: {
+      eyebrow: '03 — Experience',
+      titleStart: 'Places where I share my ',
+      titleHighlight: 'knowledge',
+      hint: 'swipe to walk through my journey',
+      items: [
+        {
+          role: 'Fullstack Developer',
+          company: 'Ingenes',
+          period: 'Apr 2023 — Present',
+          summary:
+            'Designing and building end-to-end products: intelligent onboarding with scoring, NestJS APIs, an internal e-commerce and analytics.',
+          highlights: [
+            'Designed and implemented intelligent onboarding flows with a scoring system that segments profiles by business goals, optimizing conversion.',
+            'Designed and maintained API endpoints with NestJS and Node.js, integrating databases with role-based validations for supervision flows.',
+            'Built an internal e-commerce with client-side caching (SWR) and selective revalidation, improving navigation times under high demand.',
+            'Custom analytics reports and pixel integration (META, GTAG, TikTok) to measure and optimize marketing campaigns.',
+            'Applied Clean Code and Clean Architecture; technical mentoring of Jr developers through PR reviews and deploy support.',
+          ],
+          tags: ['TypeScript', 'Next.js', 'NestJS', 'Node.js', 'Prisma', 'SWR', 'MySQL', 'Docker', 'Vercel'],
+        },
+        {
+          role: 'Frontend Developer',
+          company: 'B21',
+          period: 'Jan 2022 — Mar 2023',
+          summary:
+            'Built the fintech loan onboarding and status tracking, turning Figma designs into animated, interactive interfaces.',
+          highlights: [
+            'Developed the fintech onboarding flow for loan applications, personalized to user needs.',
+            'Integrated REST APIs together with the backend team to guarantee data consistency.',
+            'Interface to track the status of loans granted by partner financial companies.',
+            'Translated Figma designs into interactive interfaces with smooth animations using Framer Motion.',
+          ],
+          tags: ['TypeScript', 'Next.js', 'Framer Motion', 'Styled Components', 'AWS', 'Git'],
+        },
+        {
+          role: 'Fullstack Developer',
+          company: 'Proyecto Wow',
+          period: 'Oct 2020 — Dec 2021',
+          summary:
+            'Online course platform with a frontend focus and fullstack support on endpoints, authentication and session handling.',
+          highlights: [
+            'Developed an online course platform with a frontend focus and fullstack support on endpoints and authentication.',
+            'Integrated REST APIs and GraphQL queries; internal authentication and session handling.',
+            'Collaborated with UX/UI, frontend and backend teams, turning Figma designs into reusable components.',
+          ],
+          tags: ['React', 'Next.js', 'JavaScript', 'GraphQL', 'Node.js', 'Git'],
+        },
+      ],
+    },
     projects: {
-      eyebrow: '03 — Projects',
+      eyebrow: '04 — Projects',
       titleStart: 'Things I have ',
       titleHighlight: 'built',
       featuredBadge: 'Featured project',
@@ -236,7 +338,7 @@ export const content = {
       ],
     },
     contact: {
-      eyebrow: '04 — Contact',
+      eyebrow: '05 — Contact',
       titleStart: "Shall we build something ",
       titleHighlight: 'together',
       titleEnd: '?',

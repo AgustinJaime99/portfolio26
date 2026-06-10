@@ -7,7 +7,7 @@ export default function Skills() {
   const { t } = useI18n()
   const s = t.skills
   return (
-    <section id="skills" className="relative isolate mx-auto max-w-6xl px-5 pt-16 pb-12 sm:overflow-hidden sm:pt-20 sm:pb-0 sm:min-h-[680px]">
+    <section id="skills" className="relative isolate mx-auto max-w-6xl px-5 pt-28 pb-12 sm:overflow-hidden sm:pt-20 sm:pb-0 sm:min-h-[820px] lg:min-h-[900px]">
       <div className="relative z-10 pointer-events-none">
         <motion.span
           initial={{ opacity: 0 }}
@@ -31,9 +31,14 @@ export default function Skills() {
         </p>
       </div>
 
-      <Suspense fallback={null}>
-        <SkillsScene />
-      </Suspense>
+      {/* Offset the 3D scene below the title block on desktop so the graph
+          doesn't overlap the heading. On mobile SkillsScene renders a normal
+          list (not absolute), so this wrapper is a no-op there. */}
+      <div className="sm:absolute sm:inset-x-5 sm:bottom-0 sm:top-40">
+        <Suspense fallback={null}>
+          <SkillsScene />
+        </Suspense>
+      </div>
     </section>
   )
 }
