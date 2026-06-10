@@ -24,7 +24,7 @@ export default function About() {
         {a.eyebrow}
       </motion.span>
 
-      <div className="mt-10 grid items-start gap-14 lg:grid-cols-[0.9fr_1.1fr]">
+      <div className="mt-10 grid items-center gap-14 lg:grid-cols-[1fr_1.1fr]">
         <motion.div
           variants={fadeUp}
           initial="hidden"
@@ -39,19 +39,6 @@ export default function About() {
               alt={meta.name}
               className="relative w-64 rounded-3xl border border-white/10 object-cover animate-float"
             />
-          </div>
-          <div className="mt-10 grid grid-cols-3 gap-4">
-            {a.stats.map((s, i) => (
-              <motion.div
-                key={s.label}
-                variants={fadeUp}
-                custom={i + 1}
-                className="rounded-xl glass p-4 text-center"
-              >
-                <div className="text-2xl font-bold text-gradient">{s.value}</div>
-                <div className="mt-1 text-xs text-white/50">{s.label}</div>
-              </motion.div>
-            ))}
           </div>
         </motion.div>
 
