@@ -102,7 +102,7 @@ export const content = {
       scroll: 'Scroll',
     },
     about: {
-      eyebrow: '01 — Sobre mí',
+      eyebrow: '01 - Sobre mí',
       titleStart: 'Resuelvo problemas complejos con ',
       titleHighlight: 'arquitecturas limpias',
       titleEnd: ' y sistemas escalables.',
@@ -124,14 +124,14 @@ export const content = {
       ],
     },
     skills: {
-      eyebrow: '02 — Tech Stack',
+      eyebrow: '02 - Tech Stack',
       titleStart: 'Tecnologías que me ',
       titleHighlight: 'destacan',
       hint: 'toca o pasa el cursor sobre cada nodo para ver detalles',
       groups: skillGroups(['Frontend', 'Backend', 'Bases de datos & ORMs', 'DevOps & Tools', 'Ingeniería', 'IA & Automatización']),
     },
     experience: {
-      eyebrow: '03 — Experiencia',
+      eyebrow: '03 - Experiencia',
       titleStart: 'Lugares donde aporte mis ',
       titleHighlight: 'habilidades',
       hint: 'desliza para recorrer mi trayectoria',
@@ -139,7 +139,7 @@ export const content = {
         {
           role: 'Fullstack Developer',
           company: 'Ingenes',
-          period: 'Abr 2023 — Actual',
+          period: 'Abr 2023 - Actual',
           summary:
             'Diseño y construcción de productos end-to-end: onboarding inteligente con scoring, APIs en NestJS, e-commerce interno y analítica.',
           highlights: [
@@ -154,7 +154,7 @@ export const content = {
         {
           role: 'Frontend Developer',
           company: 'B21',
-          period: 'Ene 2022 — Mar 2023',
+          period: 'Ene 2022 - Mar 2023',
           summary:
             'Desarrollo del onboarding fintech para préstamos y seguimiento de su estado, traduciendo diseños de Figma a interfaces animadas.',
           highlights: [
@@ -168,7 +168,7 @@ export const content = {
         {
           role: 'Fullstack Developer',
           company: 'Proyecto Wow',
-          period: 'Oct 2020 — Dic 2021',
+          period: 'Oct 2020 - Dic 2021',
           summary:
             'Plataforma de cursos online con foco en frontend y soporte fullstack en endpoints, autenticación y manejo de sesiones.',
           highlights: [
@@ -181,7 +181,7 @@ export const content = {
       ],
     },
     projects: {
-      eyebrow: '04 — Proyectos',
+      eyebrow: '04 - Proyectos',
       titleStart: 'Cosas que he ',
       titleHighlight: 'construido',
       featuredBadge: 'Proyecto destacado',
@@ -199,7 +199,7 @@ export const content = {
       ],
     },
     contact: {
-      eyebrow: '05 — Contacto',
+      eyebrow: '05 - Contacto',
       titleStart: '¿Construimos algo ',
       titleHighlight: 'juntos',
       titleEnd: '?',
@@ -241,7 +241,7 @@ export const content = {
       scroll: 'Scroll',
     },
     about: {
-      eyebrow: '01 — About me',
+      eyebrow: '01 - About me',
       titleStart: 'I solve complex problems with ',
       titleHighlight: 'clean architecture',
       titleEnd: ' and scalable systems.',
@@ -263,14 +263,14 @@ export const content = {
       ],
     },
     skills: {
-      eyebrow: '02 — Tech Stack',
+      eyebrow: '02 - Tech Stack',
       titleStart: 'Technologies I ',
       titleHighlight: 'build with',
       hint: 'tap or hover over each node to see details',
       groups: skillGroups(['Frontend', 'Backend', 'Databases & ORMs', 'DevOps & Tools', 'Engineering', 'AI & Automation']),
     },
     experience: {
-      eyebrow: '03 — Experience',
+      eyebrow: '03 - Experience',
       titleStart: 'Places where I share my ',
       titleHighlight: 'knowledge',
       hint: 'swipe to walk through my journey',
@@ -278,7 +278,7 @@ export const content = {
         {
           role: 'Fullstack Developer',
           company: 'Ingenes',
-          period: 'Apr 2023 — Present',
+          period: 'Apr 2023 - Present',
           summary:
             'Designing and building end-to-end products: intelligent onboarding with scoring, NestJS APIs, an internal e-commerce and analytics.',
           highlights: [
@@ -293,7 +293,7 @@ export const content = {
         {
           role: 'Frontend Developer',
           company: 'B21',
-          period: 'Jan 2022 — Mar 2023',
+          period: 'Jan 2022 - Mar 2023',
           summary:
             'Built the fintech loan onboarding and status tracking, turning Figma designs into animated, interactive interfaces.',
           highlights: [
@@ -307,7 +307,7 @@ export const content = {
         {
           role: 'Fullstack Developer',
           company: 'Proyecto Wow',
-          period: 'Oct 2020 — Dec 2021',
+          period: 'Oct 2020 - Dec 2021',
           summary:
             'Online course platform with a frontend focus and fullstack support on endpoints, authentication and session handling.',
           highlights: [
@@ -320,7 +320,7 @@ export const content = {
       ],
     },
     projects: {
-      eyebrow: '04 — Projects',
+      eyebrow: '04 - Projects',
       titleStart: 'Things I have ',
       titleHighlight: 'built',
       featuredBadge: 'Featured project',
@@ -338,7 +338,7 @@ export const content = {
       ],
     },
     contact: {
-      eyebrow: '05 — Contact',
+      eyebrow: '05 - Contact',
       titleStart: "Shall we build something ",
       titleHighlight: 'together',
       titleEnd: '?',

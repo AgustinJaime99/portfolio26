@@ -7,7 +7,7 @@ export default function Footer() {
     <footer className="border-t border-white/5 px-5 py-10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
         <p className="font-mono text-sm text-white/40">
-          <span className="text-gradient">AJ</span>.dev — © {new Date().getFullYear()} {meta.name}
+          <span className="text-gradient">AJ</span>.dev - © {new Date().getFullYear()} {meta.name}
         </p>
         <p className="text-xs text-white/30">
           {t.footer.built}
