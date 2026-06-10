@@ -204,7 +204,7 @@ export const content = {
       titleHighlight: 'juntos',
       titleEnd: '?',
       description:
-        'Estoy abierto a oportunidades remotas, proyectos freelance y colaboraciones. Si tienes una idea o un proyecto en mente, hablemos.',
+        'Estoy abierto a oportunidades remotas, proyectos freelance y colaboraciones. Si tenes una idea o un proyecto en mente, hablemos.',
       sendMessage: 'Enviar mensaje',
       links: [
         { key: 'github', label: 'GitHub', value: '@AgustinJaime99' },
