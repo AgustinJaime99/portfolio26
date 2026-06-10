@@ -1,6 +1,6 @@
-# Agustín Jaime — Portfolio
+# Portfolio
 
-Portfolio personal de **Agustín Diego Jaime**, desarrollador Full Stack. Construido con un fondo 3D interactivo y animaciones de scroll profesionales.
+Bienvenidos a mi portfolio personal, aqui encontraran que tecnologias utilice y el modo de arranque para correrlo de forma local ;)
 
 ## Stack
 
