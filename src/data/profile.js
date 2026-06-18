@@ -30,7 +30,7 @@ export const skills = [
   },
   {
     category: 'Backend',
-    items: ['Node.js', 'NestJS', 'Express', 'REST APIs', 'WebSockets'],
+    items: ['Node.js', 'NestJS', 'Express', 'REST APIs', 'WebSockets', 'Kafka'],
   },
   {
     category: 'Databases & ORMs',

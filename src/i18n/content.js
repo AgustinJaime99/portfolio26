@@ -10,7 +10,7 @@ export const meta = {
 
 const skillGroups = (categories) => [
   { category: categories[0], items: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Shadcn/UI', 'Framer Motion'] },
-  { category: categories[1], items: ['Node.js', 'NestJS', 'Express', 'REST APIs', 'WebSockets'] },
+  { category: categories[1], items: ['Node.js', 'NestJS', 'Express', 'REST APIs', 'WebSockets', 'Kafka'] },
   { category: categories[2], items: ['PostgreSQL', 'MySQL', 'MongoDB', 'Prisma', 'TypeORM'] },
   { category: categories[3], items: ['Docker', 'Git', 'GitHub', 'Linux', 'Vercel'] },
   { category: categories[4], items: ['Clean Architecture', 'Hexagonal', 'DDD', 'SOLID', 'Design Patterns'] },
@@ -148,8 +148,9 @@ export const content = {
             'Desarrollo de e-commerce interno con caché en cliente (SWR) y revalidación selectiva, mejorando tiempos de navegación bajo alta demanda.',
             'Reportes de analítica personalizados e integración de píxeles (META, GTAG, TikTok) para medir y optimizar campañas.',
             'Aplicación de Clean Code y Clean Architecture; mentoría técnica a developers Jr mediante revisión de PRs y acompañamiento en deploys.',
+            'Integración de Kafka para manejo de eventos asíncronos y comunicación entre microservicios, mejorando la escalabilidad del sistema.',
           ],
-          tags: ['TypeScript', 'Next.js', 'NestJS', 'Node.js', 'Prisma', 'SWR', 'MySQL', 'Docker', 'Vercel'],
+          tags: ['TypeScript', 'Next.js', 'NestJS', 'Node.js', 'Prisma', 'SWR', 'MySQL', 'Kafka', 'Docker', 'Vercel'],
         },
         {
           role: 'Frontend Developer',
@@ -287,8 +288,9 @@ export const content = {
             'Built an internal e-commerce with client-side caching (SWR) and selective revalidation, improving navigation times under high demand.',
             'Custom analytics reports and pixel integration (META, GTAG, TikTok) to measure and optimize marketing campaigns.',
             'Applied Clean Code and Clean Architecture; technical mentoring of Jr developers through PR reviews and deploy support.',
+            'Integrated Kafka for asynchronous event handling and inter-service communication, improving system scalability.',
           ],
-          tags: ['TypeScript', 'Next.js', 'NestJS', 'Node.js', 'Prisma', 'SWR', 'MySQL', 'Docker', 'Vercel'],
+          tags: ['TypeScript', 'Next.js', 'NestJS', 'Node.js', 'Prisma', 'SWR', 'MySQL', 'Kafka', 'Docker', 'Vercel'],
         },
         {
           role: 'Frontend Developer',
