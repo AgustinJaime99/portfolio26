@@ -1,7 +1,12 @@
-import { Suspense } from 'react'
+import { Suspense, lazy } from 'react'
 import { motion } from 'framer-motion'
 import { useI18n } from '../i18n/LanguageContext'
-import SkillsScene from './SkillsScene'
+/* Lazy so three.js does not ship with the initial page.
+ * These decorative scenes pulled the whole 3D engine (~1.3MB raw) into the
+ * home bundle, which every reader paid for before the first paragraph
+ * rendered. The Suspense boundary below already existed, so deferring the
+ * import is the entire change — nothing about how the scene looks moves. */
+const SkillsScene = lazy(() => import('./SkillsScene'))
 
 export default function Skills() {
   const { t } = useI18n()

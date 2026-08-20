@@ -543,14 +543,37 @@
 /* Cold start                                                          */
 /* ------------------------------------------------------------------ */
 
+/* NOT an opaque card.
+ *
+ * The ship is flying an automatic approach behind this panel, and that has to
+ * be visible — a space experience whose first frame is a black text screen has
+ * thrown away its own opening. The panel is transparent; legibility comes from
+ * a directional scrim, not from hiding the scene. */
 .ix-boot {
   position: absolute;
   inset: 0;
-  background: var(--void);
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: clamp(28px, 9vw, 150px);
   z-index: 40;
   transition: opacity 900ms ease;
+}
+
+/* Scrim: dense on the left where the type sits, clear on the right where the
+   ship flies. Weighting it directionally means the readout stays legible
+   without dimming the shot. */
+.ix-boot__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    rgba(6, 7, 10, 0.95) 0%,
+    rgba(6, 7, 10, 0.82) 28%,
+    rgba(6, 7, 10, 0.35) 58%,
+    rgba(6, 7, 10, 0.05) 100%
+  );
+  pointer-events: none;
 }
 
 .ix-boot--out {
@@ -558,23 +581,39 @@
   pointer-events: none;
 }
 
-/* Offset from dead centre. Perfectly centred blocks float; an optical-centre
-   offset with a rule above it reads as composed. */
+/* Left-aligned, like the confirmation screen: composition in a wide field
+   rather than a centred block floating in the middle of the frame. */
 .ix-boot__inner {
-  width: min(440px, 82vw);
+  position: relative;
+  width: min(430px, 84vw);
   display: flex;
   flex-direction: column;
   gap: 11px;
-  transform: translateY(-6vh);
 }
 
-.ix-boot__inner::before {
-  content: '';
-  display: block;
-  width: 44px;
-  height: 1px;
-  background: var(--steel);
-  margin-bottom: 20px;
+/* Masthead — whose ship this is, and what it is. */
+.ix-boot__masthead {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 22px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--steel);
+}
+
+.ix-boot__ident {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--signal);
+}
+
+.ix-boot__craft {
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dust);
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .ix-boot__line {
@@ -600,20 +639,87 @@
 
 .ix-boot__status--ok { color: var(--signal); }
 
-.ix-boot__prompt {
-  margin-top: 58px;
-  text-align: center;
-  font-size: 11px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--amber);
+/* Launch control.
+ *
+ * A named action rather than "press any key": TAKE THE CONTROLS says what
+ * actually happens, and gives the moment a threshold to cross. The keyboard
+ * still works — the hint below says so — but there is now something to aim at,
+ * which matters on touch where there is no key to press. */
+.ix-boot__launch {
+  margin-top: 34px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
   opacity: 0;
-  transition: opacity 700ms ease;
+  transform: translateY(8px);
+  transition: opacity 700ms ease, transform 700ms ease;
 }
 
-.ix-boot__prompt--in {
+.ix-boot__launch--in {
   opacity: 1;
+  transform: none;
+}
+
+.ix-boot__btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 17px 26px;
+  background: rgba(255, 107, 53, 0.06);
+  border: 1px solid var(--amber);
+  color: var(--amber);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 220ms ease, color 220ms ease;
+}
+
+.ix-boot__btn:hover {
+  background: var(--amber);
+  color: var(--void);
+}
+
+.ix-boot__btn-label {
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.ix-boot__btn-hint {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.ix-boot__any {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--steel);
   animation: ix-breathe 2.6s ease-in-out infinite;
+}
+
+@media (max-width: 860px) {
+  .ix-boot {
+    align-items: flex-end;
+    padding: 0 24px 8vh;
+  }
+  /* On a phone the scrim runs bottom-up instead of left-to-right, because the
+     type sits at the bottom rather than to one side. */
+  .ix-boot__scrim {
+    background: linear-gradient(
+      to top,
+      rgba(6, 7, 10, 0.95) 0%,
+      rgba(6, 7, 10, 0.8) 42%,
+      rgba(6, 7, 10, 0.2) 78%,
+      rgba(6, 7, 10, 0) 100%
+    );
+  }
+  .ix-boot__ident { font-size: 24px; }
 }
 
 @keyframes ix-breathe {

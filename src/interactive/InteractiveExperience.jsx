@@ -11,6 +11,7 @@ import { resetFlight, setFlightState, useFlightState } from './core/flightStore'
 import { attachOrbitDrag } from './core/orbitControl'
 import FlightEngine from './core/FlightEngine'
 import CaptureSequence from './core/CaptureSequence'
+import ApproachSequence from './core/ApproachSequence'
 import LaunchSequence from './core/LaunchSequence'
 import PostProcessing from './core/PostProcessing'
 import TargetProjector from './core/TargetProjector'
@@ -85,6 +86,9 @@ function Scene({ input, reduced }) {
 
       <Vessel ref={shipRef} />
 
+      {/* Flies the ship automatically while the boot panel is up, so the
+          cold start overlays a live scene instead of hiding one. */}
+      <ApproachSequence />
       <FlightEngine input={input} shipRef={shipRef} />
       <CaptureSequence shipRef={shipRef} />
       {/* Mounted AFTER CaptureSequence so its frame callback runs later and
