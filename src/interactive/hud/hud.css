@@ -1,0 +1,1499 @@
+/**
+ * HUD — instrumentation, not decoration.
+ *
+ * Every rule here exists to keep the interface quiet:
+ *  - labels are 10px, uppercase, widely tracked. The HUD whispers.
+ *  - numbers are tabular so they never dance while they change.
+ *  - amber is reserved for active/alert states and stays under ~2% of pixels.
+ *  - no glassmorphism, no neon, no gradients between accents.
+ */
+
+.ix-root {
+  --void: #08090b;
+  --hull: #16181d;
+  --steel: #2a2e36;
+  --dust: #6e747f;
+  --signal: #e8e9eb;
+  --amber: #ff6b35;
+
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--void);
+  color: var(--signal);
+  font-family: 'Inter Tight', 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ix-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* Overlay layer: transparent to pointer events except where explicitly enabled. */
+.ix-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.ix-hud button,
+.ix-hud a,
+.ix-hud input,
+.ix-hud textarea,
+.ix-hud [data-interactive] {
+  pointer-events: auto;
+}
+
+/* ------------------------------------------------------------------ */
+/* Typography primitives                                               */
+/* ------------------------------------------------------------------ */
+
+.ix-label {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dust);
+  font-weight: 500;
+  line-height: 1;
+}
+
+.ix-value {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--signal);
+  line-height: 1.1;
+}
+
+.ix-display {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.02;
+}
+
+.ix-mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ */
+/* Corner telemetry                                                    */
+/* ------------------------------------------------------------------ */
+
+.ix-corner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ix-corner--tl { top: 28px; left: 32px; }
+.ix-corner--tr { top: 28px; right: 32px; align-items: flex-end; }
+.ix-corner--bl { bottom: 28px; left: 32px; }
+.ix-corner--br { bottom: 28px; right: 32px; align-items: flex-end; }
+
+.ix-readout {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ix-readout__row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.ix-readout--right .ix-readout__row {
+  justify-content: flex-end;
+}
+
+/* Thin rule used to anchor readouts to the screen edge. */
+.ix-rule {
+  height: 1px;
+  background: var(--steel);
+  width: 44px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Velocity bar                                                        */
+/* ------------------------------------------------------------------ */
+
+.ix-bar {
+  width: 132px;
+  height: 2px;
+  background: var(--steel);
+  position: relative;
+  overflow: hidden;
+}
+
+.ix-bar__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--signal);
+  transition: width 90ms linear;
+}
+
+.ix-bar__fill--boost {
+  background: var(--amber);
+}
+
+/* ------------------------------------------------------------------ */
+/* Control hint — retires itself once the pilot moves                  */
+/* ------------------------------------------------------------------ */
+
+.ix-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 76px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+
+.ix-hint--visible { opacity: 1; }
+
+.ix-hint__group {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.ix-key {
+  min-width: 25px;
+  height: 25px;
+  padding: 0 7px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--steel);
+  color: var(--dust);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  font-family: 'JetBrains Mono', monospace;
+  transition: border-color 160ms ease, color 160ms ease;
+}
+
+.ix-key--active {
+  border-color: var(--signal);
+  color: var(--signal);
+}
+
+/* ------------------------------------------------------------------ */
+/* Touch controls — flying with a thumb                                */
+/* ------------------------------------------------------------------ */
+
+/* Hidden on pointer-fine devices: a desktop visitor with a mouse should never
+   see thumb controls, and a media query is more reliable than a JS check that
+   can disagree with the CSS breakpoints. */
+.ix-touch { display: none; }
+
+@media (pointer: coarse) {
+  .ix-touch {
+    display: block;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 22;
+  }
+}
+
+.ix-stick,
+.ix-thrust {
+  position: absolute;
+  bottom: max(30px, env(safe-area-inset-bottom, 0px));
+  pointer-events: auto;
+  touch-action: none; /* stop the browser stealing the drag as a scroll */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Steering stick — lower left, inside the thumb's natural sweep. */
+.ix-stick {
+  left: 26px;
+  width: 132px;
+  height: 132px;
+  display: grid;
+  place-items: center;
+}
+
+.ix-stick__ring {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--steel);
+  border-radius: 50%;
+  opacity: 0.5;
+  transition: opacity 200ms ease, border-color 200ms ease;
+}
+
+/* Inner reference ring — reads as instrumentation, not as a game pad. */
+.ix-stick__ring::after {
+  content: '';
+  position: absolute;
+  inset: 30%;
+  border: 1px solid var(--steel);
+  border-radius: 50%;
+  opacity: 0.45;
+}
+
+.ix-stick__knob {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--dust);
+  border-radius: 50%;
+  background: rgba(8, 9, 11, 0.55);
+  transition: border-color 180ms ease, background 180ms ease;
+  will-change: transform;
+}
+
+.ix-stick--held .ix-stick__ring { opacity: 0.9; border-color: var(--dust); }
+.ix-stick--held .ix-stick__knob {
+  border-color: var(--amber);
+  background: rgba(255, 107, 53, 0.12);
+}
+
+/* Thrust pad — lower right. */
+.ix-thrust {
+  right: 26px;
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  border: 1px solid var(--steel);
+  border-radius: 50%;
+  background: rgba(8, 9, 11, 0.5);
+  color: var(--dust);
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 180ms ease, color 180ms ease, background 180ms ease;
+}
+
+.ix-thrust__glyph {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.ix-thrust--held {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: rgba(255, 107, 53, 0.14);
+}
+
+.ix-stick__label {
+  position: absolute;
+  bottom: -19px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--steel);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ */
+/* Docked caption — sits under the model you are looking at            */
+/* ------------------------------------------------------------------ */
+
+/* Centred on the 3D viewport, not the window: the content panel owns the right
+   third, so window-centring would push this caption off under the text. */
+.ix-dockbar {
+  position: absolute;
+  left: 0;
+  right: min(560px, 92vw);
+  /* Clear of the "exit to portfolio" link at the bottom of the viewport —
+     at 42px the two collided into one unreadable line. */
+  bottom: 76px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 26px;
+  pointer-events: none;
+}
+
+.ix-dockbar__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dust);
+  background: none;
+  border: 0;
+  padding: 6px 2px;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.ix-dockbar__item--action {
+  pointer-events: auto;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.ix-dockbar__item--action:hover { color: var(--amber); }
+.ix-dockbar__item--action:hover .ix-key--inline {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.ix-dockbar__glyph {
+  font-size: 13px;
+  line-height: 1;
+  color: var(--steel);
+}
+
+/* Inline key cap, matching the control hint's vocabulary. */
+.ix-key--inline {
+  min-width: 0;
+  height: 20px;
+  padding: 0 7px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--steel);
+  color: var(--dust);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  font-family: 'JetBrains Mono', monospace;
+  transition: border-color 160ms ease, color 160ms ease;
+}
+
+@media (max-width: 860px) {
+  /* The content panel goes full-width on narrow viewports, so centre on the
+     window instead and drop the drag hint — there is no mouse to drag with. */
+  .ix-dockbar { right: 0; bottom: 22px; gap: 14px; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Site markers — always-on idents for every destination               */
+/* ------------------------------------------------------------------ */
+
+.ix-sites {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ix-site {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  opacity: 0;
+  will-change: transform, opacity;
+  white-space: nowrap;
+}
+
+/* A tick, not an icon. Four icons on screen is a game HUD; four ticks is
+   instrumentation. */
+.ix-site__tick {
+  width: 5px;
+  height: 5px;
+  border: 1px solid var(--dust);
+  flex: 0 0 auto;
+  transform: rotate(45deg);
+}
+
+.ix-site[data-offscreen='true'] .ix-site__tick {
+  border-color: var(--amber);
+}
+
+.ix-site__arrow {
+  position: absolute;
+  left: -13px;
+  top: 50%;
+  margin-top: -5px;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 8px solid var(--amber);
+  opacity: 0;
+  transform-origin: 50% 60%;
+}
+
+.ix-site__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.ix-site__name {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--dust);
+}
+
+.ix-site__range {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--steel);
+}
+
+@media (max-width: 860px) {
+  /* Four labels is too many on a narrow viewport — keep the ticks, drop the
+     text, and the markers still point the way without crowding the frame. */
+  .ix-site__meta { display: none; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Proximity / target lock                                             */
+/* ------------------------------------------------------------------ */
+
+/* Positioned by TargetLock every frame via transform — left/top stay at 0 so
+   the JS only ever writes a single translate3d, which stays on the compositor. */
+.ix-lock {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 320ms ease;
+  will-change: transform;
+}
+
+.ix-lock--visible { opacity: 1; }
+
+/* Reticle brackets: four corners, never a full box. A closed box reads as UI
+   chrome; open corners read as an instrument acquiring something.
+   Width/height are written per-frame so the bracket tightens as you approach. */
+.ix-reticle {
+  width: 168px;
+  height: 168px;
+  position: relative;
+  transition: none;
+}
+
+.ix-reticle__corner {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--amber);
+}
+
+.ix-reticle__corner--tl { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+.ix-reticle__corner--tr { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+.ix-reticle__corner--bl { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+.ix-reticle__corner--br { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+
+/* Off-screen direction arrow. A simple triangle at the bracket centre; its
+   rotation is written per-frame. Only visible when the target leaves frame,
+   where it doubles as a "turn this way" instruction. */
+.ix-reticle__arrow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  margin: -7px 0 0 -6px;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 13px solid var(--amber);
+  opacity: 0;
+  transition: opacity 200ms ease;
+  transform-origin: 50% 60%;
+}
+
+/* When the target is off screen the bracket is a hint, not a lock: dim the
+   corners so it never claims to be sitting on something it cannot see. */
+.ix-lock[data-offscreen='true'] .ix-reticle__corner {
+  opacity: 0.28;
+}
+
+.ix-lock__meta {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  /* Keep the label block a stable width so it does not reflow as the bracket
+     resizes around it. */
+  min-width: 220px;
+}
+
+.ix-lock__title {
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--signal);
+}
+
+.ix-lock__sub {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+/* ------------------------------------------------------------------ */
+/* Cold start                                                          */
+/* ------------------------------------------------------------------ */
+
+.ix-boot {
+  position: absolute;
+  inset: 0;
+  background: var(--void);
+  display: grid;
+  place-items: center;
+  z-index: 40;
+  transition: opacity 900ms ease;
+}
+
+.ix-boot--out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Offset from dead centre. Perfectly centred blocks float; an optical-centre
+   offset with a rule above it reads as composed. */
+.ix-boot__inner {
+  width: min(440px, 82vw);
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  transform: translateY(-6vh);
+}
+
+.ix-boot__inner::before {
+  content: '';
+  display: block;
+  width: 44px;
+  height: 1px;
+  background: var(--steel);
+  margin-bottom: 20px;
+}
+
+.ix-boot__line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 18px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 420ms ease, transform 420ms ease;
+}
+
+.ix-boot__line--in {
+  opacity: 1;
+  transform: none;
+}
+
+.ix-boot__status {
+  color: var(--dust);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+}
+
+.ix-boot__status--ok { color: var(--signal); }
+
+.ix-boot__prompt {
+  margin-top: 58px;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--amber);
+  opacity: 0;
+  transition: opacity 700ms ease;
+}
+
+.ix-boot__prompt--in {
+  opacity: 1;
+  animation: ix-breathe 2.6s ease-in-out infinite;
+}
+
+@keyframes ix-breathe {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Navigation panel                                                    */
+/* ------------------------------------------------------------------ */
+
+.ix-navbtn {
+  position: absolute;
+  top: 28px;
+  right: 32px;
+  background: none;
+  border: 1px solid var(--steel);
+  color: var(--dust);
+  padding: 8px 13px;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 180ms ease, color 180ms ease;
+  font-family: inherit;
+}
+
+.ix-navbtn:hover {
+  border-color: var(--signal);
+  color: var(--signal);
+}
+
+.ix-nav {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 9, 11, 0.92);
+  display: grid;
+  place-items: center;
+  z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 280ms ease;
+}
+
+.ix-nav--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ix-nav__list {
+  width: min(520px, 86vw);
+  display: flex;
+  flex-direction: column;
+}
+
+.ix-nav__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 4px;
+  border-bottom: 1px solid var(--steel);
+  background: none;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  color: var(--signal);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: padding-left 220ms cubic-bezier(0.2, 0, 0, 1), color 180ms ease;
+}
+
+.ix-nav__item:hover {
+  padding-left: 15px;
+  color: var(--amber);
+}
+
+.ix-nav__name {
+  font-size: 26px;
+  letter-spacing: -0.01em;
+}
+
+.ix-nav__desig {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--dust);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Directory rows are informational now — no hover slide, no pointer, because
+   nothing happens when you click them. Signalling affordance that does not
+   exist is worse than signalling none. */
+.ix-nav__item--static {
+  cursor: default;
+}
+
+.ix-nav__item--static:hover {
+  padding-left: 4px;
+  color: var(--signal);
+}
+
+.ix-nav__readout {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+/* Turn instruction: actionable, so it gets the accent. */
+.ix-nav__turn {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--amber);
+  font-family: 'JetBrains Mono', monospace;
+  min-width: 84px;
+  text-align: right;
+}
+
+/* ------------------------------------------------------------------ */
+/* Content panel — editorial slab that slides in from the right        */
+/* ------------------------------------------------------------------ */
+
+.ix-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(560px, 92vw);
+  background: rgba(11, 12, 15, 0.94);
+  border-left: 1px solid var(--steel);
+  padding: 60px 46px 46px;
+  overflow-y: auto;
+  z-index: 20;
+  transform: translateX(100%);
+  transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto;
+}
+
+.ix-panel--open { transform: none; }
+
+/* A closed panel is translated off-screen but still occupies the layer and was
+   swallowing clicks meant for the panel behind it — including its own close
+   button. Anything aria-hidden must be inert to the pointer too. */
+.ix-panel[aria-hidden='true'] {
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.ix-panel__head {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding-bottom: 26px;
+  border-bottom: 1px solid var(--steel);
+}
+
+.ix-panel__desig {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--amber);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Section titles carry the editorial weight of the whole piece — they are the
+   one place the display serif gets to be loud. At 50px they were competing
+   with the body copy instead of leading it. */
+.ix-panel__title {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(46px, 6.4vw, 78px);
+  line-height: 0.98;
+  letter-spacing: -0.022em;
+}
+
+.ix-panel__sub {
+  font-size: 13px;
+  color: var(--dust);
+  line-height: 1.55;
+  max-width: 42ch;
+}
+
+.ix-panel__body {
+  padding-top: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+/* Close control.
+ *
+ * Previously a borderless 10px label in --dust: technically present, visually
+ * invisible against a busy 3D scene. The way out of a section must never be
+ * something you have to hunt for. Now it is a bordered target with real
+ * padding, a solid backing so it survives whatever is rendered behind it, and
+ * enough contrast to read at a glance. */
+.ix-close {
+  position: absolute;
+  top: 20px;
+  right: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: rgba(8, 9, 11, 0.72);
+  border: 1px solid var(--steel);
+  color: var(--signal);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 10px 14px;
+  font-family: inherit;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.ix-close:hover {
+  color: var(--amber);
+  border-color: var(--amber);
+  background: rgba(8, 9, 11, 0.9);
+}
+
+/* The ✕ glyph itself, so it reads as a control rather than as punctuation. */
+.ix-close__x {
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0.75;
+}
+
+.ix-close:hover .ix-close__x { opacity: 1; }
+
+/* Structural placeholder rows — content is intentionally empty for now. */
+.ix-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(42, 46, 54, 0.5);
+}
+
+.ix-slot__label {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dust);
+}
+
+.ix-slot__ghost {
+  height: 1px;
+  background: var(--steel);
+  width: 100%;
+}
+
+.ix-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.ix-list__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(42, 46, 54, 0.55);
+  background: none;
+  border-left: 0; border-right: 0; border-top: 0;
+  color: var(--signal);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  width: 100%;
+  transition: color 160ms ease, padding-left 200ms ease;
+}
+
+.ix-list__row:hover {
+  color: var(--amber);
+  padding-left: 8px;
+}
+
+.ix-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding-top: 4px;
+}
+
+.ix-tag {
+  font-size: 9.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--dust);
+  border: 1px solid var(--steel);
+  padding: 4px 8px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.ix-links {
+  display: flex;
+  gap: 22px;
+  padding-top: 8px;
+}
+
+.ix-link {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--signal);
+  text-decoration: none;
+  border-bottom: 1px solid var(--steel);
+  padding-bottom: 3px;
+  transition: border-color 180ms ease, color 180ms ease;
+}
+
+.ix-link:hover {
+  color: var(--amber);
+  border-color: var(--amber);
+}
+
+/* ------------------------------------------------------------------ */
+/* Transmission (SIGNAL) — text arrives, it does not appear            */
+/* ------------------------------------------------------------------ */
+
+.ix-transmission {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.ix-transmission__line {
+  font-size: 14px;
+  line-height: 1.62;
+  color: var(--signal);
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 520ms ease, transform 520ms ease;
+}
+
+.ix-transmission__line--in {
+  opacity: 1;
+  transform: none;
+}
+
+.ix-transmission__meta {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--dust);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Blinking carrier cursor while a line decodes. */
+.ix-caret {
+  display: inline-block;
+  width: 7px;
+  height: 13px;
+  background: var(--amber);
+  margin-left: 4px;
+  vertical-align: middle;
+  animation: ix-blink 1s steps(2) infinite;
+}
+
+@keyframes ix-blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Deployment                                                          */
+/* ------------------------------------------------------------------ */
+
+.ix-deploy {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.ix-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ix-field input,
+.ix-field textarea {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--steel);
+  color: var(--signal);
+  padding: 9px 0;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 200ms ease;
+  resize: none;
+}
+
+.ix-field input:focus,
+.ix-field textarea:focus {
+  border-color: var(--amber);
+}
+
+.ix-field input::placeholder,
+.ix-field textarea::placeholder {
+  color: var(--steel);
+}
+
+.ix-deploy__btn {
+  margin-top: 8px;
+  background: none;
+  border: 1px solid var(--amber);
+  color: var(--amber);
+  padding: 15px 22px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 220ms ease, color 220ms ease;
+}
+
+.ix-deploy__btn:hover {
+  background: var(--amber);
+  color: var(--void);
+}
+
+.ix-deploy__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Countdown overlay.
+ *
+ * No scrim: the scene must stay fully visible, because the camera closing on
+ * the ship IS the other half of this moment. A darkened backdrop would turn a
+ * cinematic beat into a modal. */
+.ix-countdown {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 35;
+  pointer-events: none;
+}
+
+/* Large, editorial, and NOT amber — the accent is reserved for the ring and the
+   ignition label. A white numeral over the scene reads as titling rather than
+   as a game HUD. Scale/blur/opacity are driven per-frame from the machine. */
+.ix-countdown__num {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(140px, 26vw, 320px);
+  color: var(--signal);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 60px rgba(0, 0, 0, 0.75);
+  will-change: transform, filter, opacity;
+}
+
+/* ------------------------------------------------------------------ */
+/* Sequence labels — armed / ignition                                  */
+/* ------------------------------------------------------------------ */
+
+.ix-seqlabel {
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  transform: translateX(-50%);
+  z-index: 36;
+  font-size: 10px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--dust);
+  pointer-events: none;
+  animation: ix-seqfade 900ms ease forwards;
+}
+
+.ix-seqlabel--hot {
+  color: var(--amber);
+  letter-spacing: 0.42em;
+  font-size: 12px;
+}
+
+@keyframes ix-seqfade {
+  0% { opacity: 0; letter-spacing: 0.5em; }
+  22% { opacity: 1; }
+  75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.ix-deploy__error {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--amber);
+  border-left: 1px solid var(--amber);
+  padding-left: 10px;
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------------ */
+/* Confirmation — the silence after the launch                         */
+/* ------------------------------------------------------------------ */
+
+/* Deliberately not a centred card. The composition is left-aligned in a wide
+   field of black, so the message lands in silence rather than in a dialog. */
+.ix-confirm {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  background: #06070a;
+  display: flex;
+  align-items: center;
+  padding: 0 clamp(28px, 12vw, 200px);
+  animation: ix-confirm-in 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes ix-confirm-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ix-confirm__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  max-width: 46ch;
+}
+
+.ix-confirm__tag {
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--amber);
+  font-family: 'JetBrains Mono', monospace;
+  animation: ix-rise 700ms 120ms ease both;
+}
+
+.ix-confirm__title {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(42px, 6.6vw, 84px);
+  line-height: 0.98;
+  letter-spacing: -0.022em;
+  color: var(--signal);
+  animation: ix-rise 800ms 240ms ease both;
+}
+
+.ix-confirm__body {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--dust);
+  animation: ix-rise 800ms 400ms ease both;
+}
+
+.ix-confirm__btn {
+  align-self: flex-start;
+  margin-top: 18px;
+  background: none;
+  border: 1px solid var(--steel);
+  color: var(--signal);
+  padding: 15px 26px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 200ms ease, color 200ms ease;
+  animation: ix-rise 800ms 560ms ease both;
+}
+
+.ix-confirm__btn:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+@keyframes ix-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ix-confirm,
+  .ix-confirm__tag,
+  .ix-confirm__title,
+  .ix-confirm__body,
+  .ix-confirm__btn { animation-duration: 1ms; }
+  .ix-seqlabel { animation-duration: 1ms; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Contact sheet — thumbnails inside the project panel                 */
+/* ------------------------------------------------------------------ */
+
+.ix-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Horizontal strip that scrolls rather than wrapping: a wrapping grid of
+   19:10 screenshots turns into a wall and buries the links below it. */
+.ix-sheet__row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+.ix-sheet__thumb {
+  flex: 0 0 auto;
+  width: 108px;
+  aspect-ratio: 1.93;
+  padding: 0;
+  border: 1px solid var(--steel);
+  background: var(--hull);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 160ms ease, transform 220ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.ix-sheet__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  opacity: 0.72;
+  transition: opacity 160ms ease;
+}
+
+.ix-sheet__thumb:hover {
+  border-color: var(--amber);
+  transform: translateY(-2px);
+}
+
+.ix-sheet__thumb:hover img { opacity: 1; }
+
+/* Shown while the 3D array is still decoding its textures. A slow sweep rather
+   than a spinner: this is telemetry arriving, not a page loading. */
+.ix-sheet__pending {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    var(--hull) 30%,
+    var(--steel) 50%,
+    var(--hull) 70%
+  );
+  background-size: 260% 100%;
+  animation: ix-sweep 1.5s ease-in-out infinite;
+}
+
+@keyframes ix-sweep {
+  0% { background-position: 130% 0; }
+  100% { background-position: -130% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ix-sheet__pending { animation: none; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Panel viewer — full-resolution screenshot                           */
+/* ------------------------------------------------------------------ */
+
+/* Deliberately not fully opaque: the orbit keeps turning behind it, so this
+   reads as a viewport opening rather than as leaving the experience. */
+.ix-viewer {
+  position: absolute;
+  inset: 0;
+  z-index: 32;
+  background: rgba(6, 7, 9, 0.93);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 260ms ease;
+}
+
+.ix-viewer--open { opacity: 1; pointer-events: auto; }
+
+.ix-viewer__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 28px 14px;
+  border-bottom: 1px solid var(--steel);
+}
+
+.ix-viewer__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+}
+
+.ix-viewer__stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 26px 74px;
+  min-height: 0;
+}
+
+.ix-viewer__img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border: 1px solid var(--steel);
+  /* No rounded corners, no drop shadow: this is a technical document being
+     displayed, not a card floating on a dashboard. */
+  display: block;
+}
+
+.ix-viewer__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 1px solid var(--steel);
+  color: var(--dust);
+  font-size: 15px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 160ms ease, color 160ms ease;
+}
+
+.ix-viewer__nav:hover { border-color: var(--amber); color: var(--amber); }
+.ix-viewer__nav--prev { left: 18px; }
+.ix-viewer__nav--next { right: 18px; }
+
+.ix-viewer__foot {
+  padding: 12px 28px 22px;
+  text-align: center;
+  border-top: 1px solid var(--steel);
+}
+
+@media (max-width: 860px) {
+  .ix-viewer__stage { padding: 14px 12px; }
+  .ix-viewer__nav--prev { left: 4px; }
+  .ix-viewer__nav--next { right: 4px; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Ship systems diagnostic                                             */
+/* ------------------------------------------------------------------ */
+
+.ix-systems {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  background: rgba(8, 9, 11, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 400ms ease;
+}
+
+.ix-systems--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ix-systems__head {
+  position: absolute;
+  top: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.ix-systems__title {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 34px;
+}
+
+.ix-systems__grid {
+  position: absolute;
+  left: 50%;
+  bottom: 88px;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 26px 40px;
+  width: min(980px, 88vw);
+}
+
+.ix-systems__cell {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding-top: 13px;
+  border-top: 1px solid var(--steel);
+  opacity: 0;
+  transform: translateY(7px);
+  transition: opacity 500ms ease, transform 500ms ease;
+}
+
+.ix-systems--open .ix-systems__cell { opacity: 1; transform: none; }
+
+.ix-systems__part {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.ix-systems__items {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ix-systems__item {
+  font-size: 12.5px;
+  color: var(--signal);
+}
+
+.ix-systems__note {
+  font-size: 10.5px;
+  color: var(--dust);
+  line-height: 1.45;
+}
+
+/* ------------------------------------------------------------------ */
+/* Exit to classic portfolio                                           */
+/* ------------------------------------------------------------------ */
+
+/* Sits above the bottom-right telemetry block, not on top of it. */
+.ix-exit {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dust);
+  text-decoration: none;
+  transition: color 180ms ease;
+  opacity: 0.55;
+}
+
+.ix-exit:hover { color: var(--signal); opacity: 1; }
+
+/* ------------------------------------------------------------------ */
+/* Responsive + accessibility                                          */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 860px) {
+  .ix-corner--tl, .ix-corner--bl { left: 18px; }
+  .ix-corner--tr, .ix-corner--br { right: 18px; }
+  .ix-corner--tl, .ix-corner--tr { top: 18px; }
+  .ix-corner--bl, .ix-corner--br { bottom: 18px; }
+  /* Telemetry moves up out of the thumb zone — the stick and thrust pad own
+     the bottom of a phone screen, and readouts underneath them are both
+     unreadable and un-tappable. */
+  .ix-corner--bl, .ix-corner--br { bottom: 188px; }
+  /* Shorter readouts so the block does not run into the scene. */
+  .ix-corner--bl { gap: 8px; }
+  .ix-bar { width: 96px; }
+  .ix-panel { padding: 52px 24px 30px; }
+  .ix-hint { display: none; }
+  /* Clear of the touch controls as well. */
+  .ix-exit { bottom: 168px; }
+  .ix-nav__name { font-size: 21px; }
+  .ix-systems__grid { bottom: 40px; gap: 18px 22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ix-panel { transition-duration: 200ms; }
+  .ix-boot__prompt--in { animation: none; opacity: 1; }
+  .ix-caret { animation: none; }
+  .ix-nav__item:hover { padding-left: 4px; }
+}
+
+/* Focus visibility — keyboard users must never be stranded. */
+.ix-hud :focus-visible {
+  outline: 1px solid var(--amber);
+  outline-offset: 3px;
+}
