@@ -8,6 +8,8 @@ import { ArrowDown, Github, Linkedin, Sparkles } from 'lucide-react'
  * import is the entire change — nothing about how the scene looks moves. */
 const Scene3D = lazy(() => import('./Scene3D'))
 import { useI18n } from '../i18n/LanguageContext'
+import { useTransitionPhase } from '../transition/useTransitionPhase'
+import { isDimming } from '../transition/warpStore'
 
 const container = {
   hidden: {},
@@ -21,19 +23,80 @@ const item = {
 export default function Hero() {
   const { t, meta } = useI18n()
   const h = t.hero
-  return (
-    <section id="home" className="relative flex min-h-screen items-center overflow-hidden">
-      <Suspense fallback={null}>
-        <Scene3D />
-      </Suspense>
 
-      <div className="pointer-events-none absolute inset-0 -z-[5] bg-gradient-to-b from-transparent via-transparent to-ink" />
-      <div className="pointer-events-none absolute inset-0 -z-[5] grid-bg opacity-40" />
+  /* When EXPLORE is engaged, everything in this section that is NOT the canvas
+   * steps aside. The scene keeps rendering underneath and becomes the whole
+   * screen — which is the trick: the visitor never sees a new surface appear,
+   * they see the site get out of the way of one that was already there. */
+  const phase = useTransitionPhase()
+  const dimming = isDimming(phase)
+
+  /* The moment the destination takes over. Separate from `dimming`: the UI
+     yields early and gradually, but the section itself only disappears at the
+     very end, once the breach is at full white and there is nothing to see. */
+  const handingOver = phase === 'routing' || phase === 'interactive-entry'
+
+  /* Subtle and uniform: opacity to 0 with an 8px lift. The brief is explicit
+     that the UI must not "fly away" — it yields, it does not exit. */
+  const fade = dimming
+    ? { opacity: 0, y: -8, transition: { duration: 0.5, ease: [0.4, 0, 1, 1] } }
+    : {}
+
+  return (
+    /* z-10 and an opaque background so the hero reliably covers the staged
+     * /interactive scene sitting at z-1 behind it. Without both, that scene's
+     * own fixed, opaque root shows through during the warm-up.
+     *
+     * At the peak the whole section fades out, which is what UNCOVERS the
+     * staged scene — the reveal is the Home getting out of the way, not the
+     * destination arriving. That is the entire trick, expressed in one
+     * property. */
+    <section
+      id="home"
+      style={{
+        opacity: handingOver ? 0 : 1,
+        transition: 'opacity 220ms linear',
+      }}
+      className="relative z-10 flex min-h-screen items-center overflow-hidden bg-[#05060a]"
+    >
+      {/* UNMOUNT THE HERO CANVAS ONCE THE DESTINATION HAS TAKEN OVER.
+       *
+       * Two live WebGL contexts is one more than some machines allow. Verified:
+       * with both canvases mounted the browser logged "THREE.WebGLRenderer:
+       * Context Lost" four times, the staged scene's warm-up never ran, and the
+       * multi-second stall at the reveal was the context being recovered — not
+       * shader compilation, which is what it looked like from the outside.
+       *
+       * Dropping this one at handover keeps exactly one context alive at a
+       * time. It is safe precisely here: the hero has already faded to zero, so
+       * there is nothing on screen to lose. */}
+      {!handingOver && (
+        <Suspense fallback={null}>
+          <Scene3D />
+        </Suspense>
+      )}
+
+      {/* These two sit ABOVE the canvas and tint it. They have to clear as
+          well, or the dive happens behind a scrim and a grid — the starfield
+          would visibly stay muted at exactly the moment it should take over. */}
+      <motion.div
+        aria-hidden
+        animate={{ opacity: dimming ? 0 : 1 }}
+        transition={{ duration: 0.5, ease: [0.4, 0, 1, 1] }}
+        className="pointer-events-none absolute inset-0 -z-[5] bg-gradient-to-b from-transparent via-transparent to-ink"
+      />
+      <motion.div
+        aria-hidden
+        animate={{ opacity: dimming ? 0 : 0.4 }}
+        transition={{ duration: 0.5, ease: [0.4, 0, 1, 1] }}
+        className="pointer-events-none absolute inset-0 -z-[5] grid-bg"
+      />
 
       <motion.div
         variants={container}
         initial="hidden"
-        animate="show"
+        animate={dimming ? fade : 'show'}
+        style={dimming ? { pointerEvents: 'none' } : undefined}
         className="mx-auto max-w-6xl px-5"
       >
         {/* <motion.div
@@ -94,8 +157,9 @@ export default function Hero() {
       <motion.a
         href="#about"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.4 }}
+        animate={{ opacity: dimming ? 0 : 1 }}
+        transition={dimming ? { duration: 0.35 } : { delay: 1.4 }}
+        style={dimming ? { pointerEvents: 'none' } : undefined}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/40"
       >
         <motion.div

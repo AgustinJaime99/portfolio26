@@ -70,3 +70,395 @@ body {
     background-size: 60px 60px;
   }
 }
+
+
+/* ==================================================================
+   EXPLORE SHIP BUTTON
+   Access module for the interactive experience. Built from the site's
+   own tokens: Space Grotesk label, JetBrains Mono eyebrow, accent2
+   cyan, accent3 violet.
+
+   Structure is a DOUBLE FRAME — a bright outer ring with a dimmer
+   inset ring drawn just inside it. That gap is what makes it read as
+   machined hardware rather than as a card with a border, and it is the
+   detail the first pass missed.
+   ================================================================== */
+
+.esb {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 96px;
+  border-radius: 16px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  cursor: pointer;
+  isolation: isolate;
+  text-align: left;
+  /* Nearly opaque. At 0.86 the hero copy behind the menu read straight
+     through the module and turned the label into visual noise — a panel you
+     can read the page through is not a panel. */
+  background: rgba(7, 9, 17, 0.985);
+  box-shadow:
+    0 0 34px rgba(63, 110, 255, 0.1),
+    inset 0 0 28px rgba(66, 120, 255, 0.04);
+  transition:
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---- Ambient field -------------------------------------------- */
+
+.esb__field {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* An opaque base UNDER the radials.
+   *
+   * The radials fade to `transparent`, so on their own they leave most of the
+   * panel see-through and the hero copy behind the menu reads straight through
+   * the module. Compositing them over a solid layer here — rather than relying
+   * on the button's own background — keeps the colour as ambient energy while
+   * the panel stays genuinely solid. */
+  background:
+    radial-gradient(circle at 15% 50%, rgba(35, 110, 255, 0.13), transparent 38%),
+    radial-gradient(circle at 85% 40%, rgba(130, 70, 255, 0.11), transparent 42%),
+    linear-gradient(#070911, #070911);
+  transition:
+    transform 380ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---- Dot grid ---------------------------------------------------- */
+
+/* Base layer: present but barely. It gives the panel a machined texture and,
+   more importantly, gives the lit layer something to light UP — a glow with no
+   grid underneath reads as a smear following the cursor. */
+.esb__grid {
+  position: absolute;
+  inset: 1px;
+  border-radius: 15px;
+  background-image: radial-gradient(rgba(150, 195, 235, 0.75) 1px, transparent 1px);
+  background-size: 14px 14px;
+  background-position: 7px 7px;
+  opacity: 0.1;
+  pointer-events: none;
+  transition: opacity 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Lit layer: same grid, cyan and bright, revealed only inside a soft radial
+   centred on the pointer. --mx/--my are written by the component on
+   pointermove; they default to the centre so the element is never mid-panel
+   blank before the first move. */
+.esb__grid--lit {
+  background-image: radial-gradient(rgba(120, 235, 255, 1) 1.15px, transparent 1.15px);
+  opacity: 0;
+  -webkit-mask-image: radial-gradient(
+    circle 92px at var(--mx, 50%) var(--my, 50%),
+    #000 0%,
+    rgba(0, 0, 0, 0.55) 42%,
+    transparent 72%
+  );
+  mask-image: radial-gradient(
+    circle 92px at var(--mx, 50%) var(--my, 50%),
+    #000 0%,
+    rgba(0, 0, 0, 0.55) 42%,
+    transparent 72%
+  );
+  /* Only the fade in/out is eased. The mask position itself is NOT transitioned
+     — lagging it behind the cursor is what makes this kind of effect feel
+     rubbery instead of responsive. */
+  transition: opacity 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---- Outer frame ----------------------------------------------- */
+
+/* Clearly visible, cyan on the left running to violet on the right. The
+   previous pass sat near 0.3 alpha and effectively disappeared against the
+   menu's own glass panel. */
+.esb__border {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    100deg,
+    rgba(34, 211, 238, 0.85) 0%,
+    rgba(99, 102, 241, 0.55) 52%,
+    rgba(168, 85, 247, 0.8) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  transition:
+    opacity 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---- Inner frame ----------------------------------------------- */
+
+/* The second ring, inset 6px. Dim on purpose: it should register as a
+   machined edge, not compete with the outer frame. */
+.esb__inset {
+  position: absolute;
+  inset: 6px;
+  border-radius: 11px;
+  border: 1px solid rgba(120, 175, 220, 0.16);
+  transition: border-color 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+/* ---- Idle scan ------------------------------------------------- */
+
+.esb__scan {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    transparent 38%,
+    rgba(190, 245, 255, 0.95) 47%,
+    rgba(34, 211, 238, 0.6) 52%,
+    transparent 60%,
+    transparent 100%
+  );
+  background-size: 260% 100%;
+  background-position: 165% 0;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  animation: esb-scan 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+
+@keyframes esb-scan {
+  0%, 80% { background-position: 165% 0; opacity: 0; }
+  83% { opacity: 1; }
+  96% { background-position: -65% 0; opacity: 1; }
+  100% { background-position: -65% 0; opacity: 0; }
+}
+
+/* ---- Corner brackets ------------------------------------------- */
+
+/* All four, sitting in the gap between the two frames — which is exactly
+   what the gap is there for. */
+.esb__mark {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border-color: rgba(34, 211, 238, 0.9);
+  transition: all 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.esb__mark--tl { top: 3px; left: 3px; border-top: 1px solid; border-left: 1px solid; border-top-left-radius: 4px; }
+.esb__mark--tr { top: 3px; right: 3px; border-top: 1px solid; border-right: 1px solid; border-top-right-radius: 4px; }
+.esb__mark--bl { bottom: 3px; left: 3px; border-bottom: 1px solid; border-left: 1px solid; border-bottom-left-radius: 4px; }
+.esb__mark--br { bottom: 3px; right: 3px; border-bottom: 1px solid; border-right: 1px solid; border-bottom-right-radius: 4px; }
+
+/* Perforated panel on the right face — reads as a vent. */
+.esb__dots {
+  position: absolute;
+  top: 15px;
+  right: 52px;
+  width: 22px;
+  height: 12px;
+  background-image: radial-gradient(rgba(150, 190, 235, 0.5) 0.9px, transparent 0.9px);
+  background-size: 5px 5px;
+  transition: opacity 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* ---- Layout ---------------------------------------------------- */
+
+.esb__inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 100%;
+  padding: 0 22px;
+}
+
+/* ---- Navigation visor ------------------------------------------ */
+
+.esb__visor {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+}
+
+/* Dashed orbital ring: the reference reads as an orbit path, which a solid
+   arc cannot convey. */
+.esb__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px dashed rgba(34, 211, 238, 0.45);
+  transition: border-color 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* A second, tighter arc — incomplete, so the visor never reads as a badge. */
+.esb__ring::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  border: 1px solid rgba(34, 211, 238, 0.22);
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  transform: rotate(-30deg);
+}
+
+.esb__tick {
+  position: absolute;
+  width: 2.5px;
+  height: 2.5px;
+  border-radius: 50%;
+  background: rgba(34, 211, 238, 0.85);
+  transition: background 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.esb__tick--n { transform: translateY(-23px); }
+.esb__tick--e { transform: translateX(23px); }
+.esb__tick--s { transform: translateY(23px); }
+
+/* Offset up-left inside the ring, as in the reference: a craft on a path,
+   not an icon centred in a circle. */
+.esb__rocket {
+  position: relative;
+  color: #4fe0ff;
+  transform: translate(-1px, -1px);
+  transition:
+    transform 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 340ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---- Type ------------------------------------------------------ */
+
+.esb__text {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.esb__eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(90, 210, 245, 0.92);
+  line-height: 1;
+}
+
+.esb__label {
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: #f2f6fb;
+}
+
+/* Bright enough to read as the outbound cue it is. */
+.esb__chevron {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: rgba(226, 238, 252, 0.85);
+  transition:
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---- Hover (pointer devices only) ------------------------------ */
+
+@media (hover: hover) {
+  .esb:hover {
+    box-shadow:
+      0 0 46px rgba(63, 130, 255, 0.17),
+      inset 0 0 30px rgba(66, 140, 255, 0.06);
+  }
+  .esb:hover .esb__border { filter: brightness(1.35) saturate(1.15); }
+  .esb:hover .esb__inset { border-color: rgba(140, 200, 240, 0.3); }
+  .esb:hover .esb__field { transform: translateX(9%); }
+  .esb:hover .esb__rocket { transform: translate(1px, -3px); }
+  .esb:hover .esb__chevron { transform: translateX(3px); color: #7fe9ff; }
+  .esb:hover .esb__mark { border-color: rgba(120, 235, 255, 1); }
+  .esb:hover .esb__ring { border-color: rgba(34, 211, 238, 0.7); }
+  .esb:hover .esb__dots { opacity: 1; }
+  .esb:hover .esb__grid { opacity: 0.18; }
+  .esb:hover .esb__grid--lit { opacity: 0.85; }
+}
+
+/* ---- Press ------------------------------------------------------ */
+
+.esb[data-pressed='true'] { transform: scale(0.985); }
+.esb[data-pressed='true'] .esb__border { filter: brightness(1.55) saturate(1.2); }
+.esb[data-pressed='true'] .esb__rocket { filter: drop-shadow(0 0 7px rgba(79, 224, 255, 0.8)); }
+.esb[data-pressed='true'] .esb__grid--lit { opacity: 1; }
+
+/* ---- Arm sequence ----------------------------------------------- */
+
+.esb[data-arming='true'] {
+  transform: scale(0.985);
+  box-shadow:
+    0 0 54px rgba(63, 150, 255, 0.26),
+    inset 0 0 34px rgba(66, 150, 255, 0.1);
+}
+.esb[data-arming='true'] .esb__border { filter: brightness(2) saturate(1.3); }
+.esb[data-arming='true'] .esb__inset { border-color: rgba(150, 225, 255, 0.5); }
+.esb[data-arming='true'] .esb__mark { border-color: #9ff2ff; }
+.esb[data-arming='true'] .esb__rocket {
+  transform: translate(3px, -6px);
+  filter: drop-shadow(0 0 11px rgba(120, 235, 255, 0.95));
+}
+.esb[data-arming='true'] .esb__chevron { transform: translateX(8px); color: #9ff2ff; }
+.esb[data-arming='true'] .esb__scan { animation: none; opacity: 0; }
+/* On arm the whole grid lights, not just the patch under the cursor: the
+   module is powering up, so the mask is dropped entirely. */
+.esb[data-arming='true'] .esb__grid { opacity: 0.4; }
+.esb[data-arming='true'] .esb__grid--lit {
+  opacity: 1;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+/* ---- Focus ------------------------------------------------------ */
+
+.esb:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 3px;
+}
+
+/* ---- Reduced motion --------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .esb,
+  .esb__field,
+  .esb__rocket,
+  .esb__chevron,
+  .esb__border,
+  .esb__inset,
+  .esb__mark { transition-duration: 1ms; }
+  .esb__scan { animation: none; opacity: 0; }
+  /* The grid stays — it is texture, not motion — but it no longer chases the
+     pointer. A uniform lift on hover conveys the same state change. */
+  .esb__grid--lit { -webkit-mask-image: none; mask-image: none; }
+  .esb:hover .esb__grid--lit { opacity: 0.3; }
+  .esb[data-pressed='true'],
+  .esb[data-arming='true'] { transform: none; }
+  .esb:hover .esb__field { transform: none; }
+  .esb:hover .esb__rocket,
+  .esb[data-arming='true'] .esb__rocket { transform: translate(-1px, -1px); }
+  .esb:hover .esb__chevron,
+  .esb[data-arming='true'] .esb__chevron { transform: none; }
+}

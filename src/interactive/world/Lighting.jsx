@@ -58,10 +58,13 @@ export default function Lighting({ reduced = false }) {
 
   return (
     <>
-      {/* KEY — the sun. Everything's terminator is defined by this vector. */}
+      {/* KEY — the sun. Everything's terminator is defined by this vector.
+          Raised alongside the 3x photosphere: a visibly larger star that lit
+          the scene no more brightly would read as a painted backdrop rather
+          than as the source of the light. */}
       <directionalLight
         position={keyPos}
-        intensity={2.6}
+        intensity={3.9}
         color={LIGHT.key}
         castShadow={false}
       />

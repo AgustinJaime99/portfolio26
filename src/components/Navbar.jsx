@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, Github, Linkedin, Languages } from 'lucide-react'
 import { useI18n } from '../i18n/LanguageContext'
+import ExploreLink from './ExploreLink'
+import ExploreShipButton from './ExploreShipButton'
+import { useTransitionPhase } from '../transition/useTransitionPhase'
+import { isDimming } from '../transition/warpStore'
 
 export default function Navbar() {
   const { t, meta, lang, toggle } = useI18n()
@@ -10,6 +14,12 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState('home')
+
+  /* The header is the last piece of site chrome standing between the visitor
+     and the space. It goes first, and slightly faster than the hero content —
+     the frame clears before its contents do. */
+  const phase = useTransitionPhase()
+  const dimming = isDimming(phase)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -47,29 +57,44 @@ export default function Navbar() {
   return (
     <motion.header
       initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
+      animate={
+        dimming
+          ? { y: -8, opacity: 0, transition: { duration: 0.42, ease: [0.4, 0, 1, 1] } }
+          : { y: 0, opacity: 1 }
+      }
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+      // Pointer events die with the opacity so nothing here can be clicked
+      // while it is fading out from under the cursor.
+      style={dimming ? { pointerEvents: 'none' } : undefined}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'py-3' : 'py-5'
+        scrolled ? 'p-5' : 'py-5'
       }`}
     >
       <nav
-        className={`mx-auto flex max-w-6xl items-center justify-between px-5 transition-all duration-300 ${
+        // Horizontal padding scales with the viewport: at a flat px-5 the logo
+        // and menu button sat almost against the edges once the bar picked up
+        // its glass background on scroll, which reads as a crop rather than a
+        // panel.
+        className={`mx-auto flex max-w-6xl items-center justify-between px-6 sm:px-8 lg:px-10 transition-all duration-300 ${
           scrolled ? 'glass rounded-2xl py-3' : ''
         }`}
         style={scrolled ? { marginLeft: 'auto', marginRight: 'auto', maxWidth: '64rem' } : {}}
       >
-        <a href="#home" className="font-mono text-lg font-bold tracking-tight">
+        <a href="#home" className="mr-4 shrink-0 font-mono text-lg font-bold tracking-tight">
           <span className="text-gradient">AJ</span>
           <span className="text-white/40">.dev</span>
         </a>
 
-        <ul className="hidden items-center gap-1 md:flex">
+        {/* Only shown from lg up. Adding the Explore destination pushed this row
+            past its width at md, wrapping "Sobre mí" onto two lines and running
+            the logo into the first pill. Below lg the burger menu carries the
+            same links, so nothing is lost. */}
+        <ul className="hidden items-center gap-1 lg:flex">
           {navLinks.map((link) => (
             <li key={link.id}>
               <a
                 href={`#${link.id}`}
-                className={`relative rounded-lg px-4 py-2 text-sm transition-colors ${
+                className={`relative whitespace-nowrap rounded-lg px-3 py-2 text-sm transition-colors ${
                   active === link.id ? 'text-white' : 'text-white/55 hover:text-white'
                 }`}
               >
@@ -87,14 +112,17 @@ export default function Navbar() {
           <li>
             <Link
               to="/blog"
-              className="rounded-lg px-4 py-2 text-sm text-white/55 transition-colors hover:text-white"
+              className="whitespace-nowrap rounded-lg px-3 py-2 text-sm text-white/55 transition-colors hover:text-white"
             >
               {t.nav.blog}
             </Link>
           </li>
+          <li>
+            <ExploreLink variant="inline" />
+          </li>
         </ul>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden shrink-0 items-center gap-3 lg:flex">
           <a href={meta.github} target="_blank" rel="noreferrer" className="text-white/60 transition hover:text-accent2">
             <Github size={20} />
           </a>
@@ -110,7 +138,7 @@ export default function Navbar() {
           </a>
         </div>
 
-        <div className="flex items-center gap-3 md:hidden">
+        <div className="flex items-center gap-3 lg:hidden">
           <LangToggle />
           <button className="text-white" onClick={() => setOpen((v) => !v)} aria-label="menu">
             {open ? <X /> : <Menu />}
@@ -124,7 +152,7 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mx-5 mt-2 overflow-hidden rounded-2xl glass md:hidden"
+            className="mx-5 mt-2 overflow-hidden rounded-2xl glass lg:hidden"
           >
             <ul className="flex flex-col p-3">
               {navLinks.map((link) => (
@@ -146,6 +174,11 @@ export default function Navbar() {
                 >
                   {t.nav.blog}
                 </Link>
+              </li>
+              {/* Separated by a rule: everything above scrolls the page, this
+                  leaves it. */}
+              <li className="mt-3 border-t border-white/10 pt-3">
+                <ExploreShipButton onNavigate={() => setOpen(false)} />
               </li>
             </ul>
           </motion.div>

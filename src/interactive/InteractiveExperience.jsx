@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { AdaptiveDpr, PerformanceMonitor, Preload } from '@react-three/drei'
+import { AdaptiveDpr, PerformanceMonitor } from '@react-three/drei'
 import * as THREE from 'three'
 
 import './hud/hud.css'
@@ -15,6 +15,7 @@ import ApproachSequence from './core/ApproachSequence'
 import LaunchSequence from './core/LaunchSequence'
 import PostProcessing from './core/PostProcessing'
 import TargetProjector from './core/TargetProjector'
+import WarmUp from './core/WarmUp'
 
 import Vessel from './ship/Vessel'
 import Starfield from './world/Starfield'
@@ -98,12 +99,23 @@ function Scene({ input, reduced }) {
           can sit on the actual object instead of at screen centre. */}
       <TargetProjector />
 
+      {/* Compiles every material a few per frame instead of all at once.
+       *
+       * REPLACES <Preload all />, which did the same work in a single
+       * uninterruptible call — measured at 3634ms of blocked main thread,
+       * landing exactly on the reveal because three.js compiles a program the
+       * first time its object is drawn. Same total work, spread so no single
+       * frame stalls, and it reports when it is genuinely finished so the
+       * transition can wait for it.
+       *
+       * Mounted BEFORE PostProcessing so its frame callback runs first: the
+       * composer takes over rendering at priority>0. */}
+      <WarmUp />
+
       {/* Bloom is what makes emissives read as light rather than as bright
           paint. Disabled entirely in reduced mode — it is the first thing to
           go on weak hardware. */}
       <PostProcessing enabled={!reduced} quality={reduced ? 'low' : 'high'} />
-
-      <Preload all />
     </>
   )
 }

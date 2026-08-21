@@ -272,21 +272,26 @@ export function DistantSun() {
     <group position={SUN_POSITION}>
       {/* Photosphere. Small and very hot — the disc of a distant star subtends
           almost nothing; it is the glare around it that reads as "sun". */}
+      {/* Photosphere, 3x. A bigger disc reads as a nearer, more present star
+          and gives the corona something substantial to sit around. */}
       <mesh>
-        <sphereGeometry args={[16, 24, 24]} />
+        <sphereGeometry args={[48, 32, 32]} />
         <meshBasicMaterial color={0xfffaf0} toneMapped={false} />
       </mesh>
 
       <group ref={groupRef}>
         {/* Inner glare — tight, hot, drives the bloom. */}
-        <Corona size={190} color={0xffeed4} intensity={0.9} falloff={3.8} />
+        <Corona size={570} color={0xffeed4} intensity={0.9} falloff={3.8} />
         {/* Mid halo */}
-        <Corona size={430} color={0xffdcae} intensity={0.22} falloff={3.4} />
+        <Corona size={1290} color={0xffdcae} intensity={0.22} falloff={3.4} />
         {/* Outer wings. Steep falloff and low intensity on purpose: at
             falloff 1.9 the halo spread across a quarter of the frame and
             lifted the void to brown haze. Glare should imply an enormous
-            distant source, not fog the shot. */}
-        <Corona size={900} color={0xffcf96} intensity={0.07} falloff={3.0} />
+            distant source, not fog the shot.
+            Scaled 3x with the rest, but intensity is UNCHANGED — a wider halo
+            at the same brightness is exactly the goal; raising both would put
+            the brown haze back. */}
+        <Corona size={2700} color={0xffcf96} intensity={0.07} falloff={3.0} />
       </group>
     </group>
   )

@@ -1583,7 +1583,59 @@
   /* Shorter readouts so the block does not run into the scene. */
   .ix-corner--bl { gap: 8px; }
   .ix-bar { width: 96px; }
-  .ix-panel { padding: 52px 24px 30px; }
+  /* THE PANEL BECOMES A BOTTOM SHEET.
+   *
+   * A side panel is right on desktop, where 560px still leaves most of the
+   * viewport for the scene. On a 390px phone that same rule covered 92% of the
+   * screen and the 3D was reduced to a useless strip down one edge — the
+   * section you flew to became invisible the moment you arrived.
+   *
+   * As a sheet the split is horizontal instead: the scene keeps the top ~44%
+   * and the content occupies the bottom, which is also where the thumb is. */
+  .ix-panel {
+    top: 56vh;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: auto;
+    padding: 22px 22px 26px;
+    border-left: 0;
+    border-top: 1px solid var(--steel);
+    /* Slide up from the bottom, not in from the side. */
+    transform: translateY(100%);
+    /* Slightly more transparent than desktop, and blurred, so the scene reads
+       through the sheet as depth rather than being walled off by it. */
+    background: rgba(9, 10, 13, 0.9);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-radius: 2px 2px 0 0;
+  }
+
+  .ix-panel--open { transform: translateY(0); }
+
+  /* Grab handle — states that the sheet is a surface, and hints it can be
+     dismissed, without adding a word of copy. */
+  .ix-panel::before {
+    content: '';
+    position: absolute;
+    top: 9px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 38px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--steel);
+  }
+
+  /* Tighter type so more of the list fits in the sheet without scrolling. */
+  .ix-panel__title { font-size: clamp(30px, 9vw, 42px); }
+  .ix-panel__head { padding-bottom: 16px; gap: 8px; }
+  .ix-panel__body { padding-top: 16px; gap: 18px; }
+  .ix-list__row { padding: 11px 0; }
+
+  /* The close control moves to the sheet's own header row. */
+  .ix-close { top: 18px; right: 16px; padding: 8px 11px; font-size: 10px; }
+
   .ix-hint { display: none; }
   /* Clear of the touch controls as well. */
   .ix-exit { bottom: 168px; }

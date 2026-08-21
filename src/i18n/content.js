@@ -88,6 +88,8 @@ export const content = {
         { id: 'contact', label: 'Contacto' },
       ],
       blog: 'Blog',
+      interactive: 'Explorar',
+      interactiveEyebrow: 'Control de nave',
       cta: 'Hablemos',
     },
     hero: {
@@ -228,6 +230,8 @@ export const content = {
         { id: 'contact', label: 'Contact' },
       ],
       blog: 'Blog',
+      interactive: 'Explore',
+      interactiveEyebrow: 'Ship controls',
       cta: "Let's talk",
     },
     hero: {

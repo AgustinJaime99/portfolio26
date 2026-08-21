@@ -122,7 +122,15 @@ export default function CaptureSequence({ shipRef }) {
      * Applied to the LOOK TARGET rather than the camera, so the orbit stays
      * physically honest. Kept modest: at 22 it pushed the subject so far that
      * it left frame entirely and read as "the camera missed". */
-    const framingShift = 11
+    /* On mobile the content is a BOTTOM SHEET, not a side panel, so the empty
+     * space is above rather than beside. Shifting the subject sideways there
+     * would push it behind nothing and leave it hidden under the sheet — the
+     * offset has to become vertical instead. */
+    const isNarrow = typeof window !== 'undefined' && window.innerWidth < 860
+    const framingShift = isNarrow ? 0 : 11
+    // Raise the look target so the structure sits in the upper half, clear of
+    // the sheet. Negative because lowering the aim raises the subject in frame.
+    const verticalShift = isNarrow ? -(orbitRadius + camStandoff) * 0.3 : 0
 
     if (st.phase === 'capturing') {
       tRef.current += delta / MOTION.captureDuration
@@ -155,6 +163,7 @@ export default function CaptureSequence({ shipRef }) {
       _look.y += aimY
       _look.x += Math.sin(camAngle + Math.PI / 2) * framingShift * e
       _look.z += Math.cos(camAngle + Math.PI / 2) * framingShift * e
+      _look.y += verticalShift * e
       camera.lookAt(_look)
 
       if (t >= 1) {
@@ -273,6 +282,7 @@ export default function CaptureSequence({ shipRef }) {
     _look.y += aimY
     _look.x += Math.sin(camAngle + Math.PI / 2) * framingShift
     _look.z += Math.cos(camAngle + Math.PI / 2) * framingShift
+    _look.y += verticalShift
 
     // Blend between planet framing and satellite framing.
     if (fb > 0.001) {
